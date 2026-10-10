@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuis Cerdas</title>
+<style>
+:root{--navy:#071b49;--blue:#2678f3;--green:#20c878;--purple:#8b5cf6;--ink:#172554;--muted:#64748b;--line:#dbeafe;--bg:#f3f7ff}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(145deg,#06163d,#0a3479);color:white;min-height:100vh;padding:20px}
+button,input,textarea,select{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:12px 16px;font-weight:700;transition:.15s}button:hover{filter:brightness(1.06);transform:translateY(-1px)}button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.app{width:min(920px,100%);margin:0 auto}.top{text-align:center;padding:26px 12px 20px}.brain{font-size:48px}.top h1{font-size:clamp(2rem,6vw,3.4rem);margin:0;color:#fff}.top h1 span{color:#ffc857}.top p{color:#c7dcff;margin:8px 0 0}.panel{background:#fff;color:var(--ink);border-radius:22px;padding:clamp(18px,4vw,30px);box-shadow:0 18px 50px #00113d55;margin:12px 0}.hidden{display:none!important}.menu{display:grid;gap:12px;max-width:440px;margin:24px auto}.primary{background:var(--blue);color:white}.success{background:var(--green);color:white}.purple{background:var(--purple);color:white}.secondary{background:#e8f1ff;color:#17417d}.danger{background:#fee2e2;color:#b91c1c}.wide{width:100%}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.label{display:block;font-weight:750;margin:15px 0 7px}.field{width:100%;padding:12px;border:1px solid #cbdcf7;border-radius:10px;background:#fff;color:#172554}.hint{font-size:.88rem;color:var(--muted)}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}.choice{background:#eaf2ff;color:#15366b;text-align:left;border:2px solid #d6e6ff;min-height:54px}.choice.selected{border-color:var(--blue);background:#dbeafe}.choice.correct{border-color:#16a34a;background:#dcfce7}.choice.wrong{border-color:#ef4444;background:#fee2e2}.question{font-size:1.3rem;font-weight:800;line-height:1.4}.progress{height:9px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin:12px 0 20px}.progress div{height:100%;background:var(--blue);width:0;transition:width .2s}.feedback{padding:14px;border-radius:12px;background:#eff6ff;margin:12px 0;color:#1e3a8a}.list{display:grid;gap:10px;margin-top:18px}.item{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:flex-start}.item main{flex:1;min-width:0}.item p{margin:5px 0;color:var(--muted);font-size:.9rem}.item-actions{display:flex;gap:6px}.item-actions button{padding:8px 10px}.pill{display:inline-block;padding:4px 9px;border-radius:20px;background:#dbeafe;color:#1d4ed8;font-size:.8rem;font-weight:700}.result{text-align:center}.score{font-size:2.5rem;font-weight:900;color:var(--blue)}.small-title{margin:0 0 10px}.empty{padding:18px;background:#f1f5f9;border-radius:12px;color:#64748b;text-align:center}
+@media(max-width:560px){body{padding:12px}.choices{grid-template-columns:1fr}.item{flex-wrap:wrap}.item-actions{width:100%}.item-actions button{flex:1}.top{padding-top:15px}.panel{border-radius:16px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="brain">🧠🤖</div><h1>KUIS <span>CERDAS</span></h1><p>Uji pengetahuanmu, belajar sambil bersenang-senang!</p></header>
+
+<section id="home" class="panel">
+  <h2 style="text-align:center">Selamat Datang!</h2>
+  <p style="text-align:center;color:#64748b">Pilih cara bermain di bawah ini.</p>
+  <div class="menu">
+    <button class="primary wide" onclick="showSetup()">▶ Mulai Kuis</button>
+    <button class="success wide" onclick="openForm()">＋ Buat Pertanyaan Sendiri</button>
+    <button class="purple wide" onclick="openList()">☷ Lihat Daftar Pertanyaan Saya</button>
+  </div>
+  <p class="hint" style="text-align:center">💾 Pertanyaan buatanmu tersimpan otomatis di browser perangkat ini.</p>
+</section>
+
+<section id="setup" class="panel hidden">
+  <div class="row"><h2 class="small-title">🎯 Pilih Sumber Soal</h2><button class="secondary" style="flex:0 0 auto" onclick="goHome()">← Menu</button></div>
+  <label class="label">Soal yang digunakan</label>
+  <select id="source" class="field">
+    <option value="all">Semua soal (bawaan + buatan sendiri)</option>
+    <option value="builtin">Hanya soal bawaan</option>
+    <option value="custom">Hanya soal buatan sendiri</option>
+  </select>
+  <p id="sourceHint" class="hint"></p>
+  <button class="primary wide" onclick="startQuiz()">Mulai Kuis →</button>
+</section>
+
+<section id="formPage" class="panel hidden">
+  <div class="row"><h2 class="small-title">✍️ Buat Pertanyaan Sendiri</h2><button class="secondary" style="flex:0 0 auto" onclick="goHome()">← Menu</button></div>
+  <form id="questionForm">
+    <label class="label" for="question">Pertanyaan *</label><textarea id="question" class="field" rows="3" required placeholder="Tulis pertanyaan di sini..."></textarea>
+    <div class="row"><label class="label">Pilihan jawaban (2–4) *</label><span class="hint" id="optionCount" style="text-align:right">2 pilihan</span></div>
+    <div id="optionInputs"></div>
+    <div class="row" style="margin-top:8px"><button type="button" class="secondary" id="addOption">＋ Tambah Pilihan</button><button type="button" class="secondary" id="removeOption">− Hapus Pilihan</button></div>
+    <label class="label" for="correct">Jawaban yang benar *</label><select id="correct" class="field" required></select>
+    <label class="label" for="comment">Komentar lucu setelah menjawab (opsional)</label><input id="comment" class="field" placeholder="Contoh: Wah, kamu hebat banget! 😄">
+    <div class="row" style="margin-top:18px"><button type="submit" class="success" id="saveBtn">💾 Simpan Pertanyaan</button><button type="button" class="secondary" onclick="resetForm()">Kosongkan Form</button></div>
+  </form>
+  <hr style="border:0;border-top:1px solid #e2e8f0;margin:25px 0">
+  <h3>Pertanyaan Buatan Sendiri <span class="pill" id="customCount">0 soal</span></h3>
+  <div id="formList" class="list"></div>
+</section>
+
+<section id="listPage" class="panel hidden">
+  <div class="row"><h2 class="small-title">📋 Daftar Pertanyaan Saya</h2><button class="secondary" style="flex:0 0 auto" onclick="goHome()">← Menu</button></div>
+  <button class="primary" onclick="openForm()">＋ Buat Pertanyaan Baru</button>
+  <div id="questionList" class="list"></div>
+</section>
+
+<section id="quiz" class="panel hidden">
+  <div class="row"><span id="quizProgressText" class="pill">Soal 1</span><span id="scoreText" style="text-align:right;font-weight:800">⭐ Skor: 0</span></div>
+  <div class="progress"><div id="progressBar"></div></div>
+  <div id="quizQuestion" class="question"></div>
+  <div id="quizChoices" class="choices"></div>
+  <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+  <div class="row"><button class="secondary" onclick="goHome()">⌂ Menu</button><button id="nextBtn" class="primary" disabled onclick="nextQuestion()">Berikutnya →</button></div>
+</section>
+
+<section id="result" class="panel result hidden">
+  <div style="font-size:60px">🏆</div><h2 id="resultTitle">Kuis Selesai!</h2>
+  <p>Skor akhir</p><div class="score" id="finalScore">0 / 0</div><p id="resultMessage"></p>
+  <div class="row"><button class="secondary" onclick="goHome()">⌂ Kembali ke Menu</button><button class="success" onclick="showSetup()">↻ Main Lagi</button></div>
+</section>
+<footer style="text-align:center;color:#bfd6ff;padding:16px;font-size:.85rem">Kuis Cerdas • Belajar jadi menyenangkan ✨</footer>
+</div>
+<script>
+const builtIn = [
+ {id:'b1',q:'Apa ibu kota Indonesia?',options:['Bandung','Jakarta','Surabaya','Yogyakarta'],correct:1,comment:'Jawaban yang tepat! 🇮🇩',type:'builtin'},
+ {id:'b2',q:'Berapa jumlah hari dalam seminggu?',options:['5 hari','6 hari','7 hari','8 hari'],correct:2,comment:'Mudah, kan? Tetap semangat! 💪',type:'builtin'},
+ {id:'b3',q:'Hewan apa yang bisa terbang?',options:['Kucing','Ikan','Burung','Kambing'],correct:2,comment:'Terbang tinggi seperti cita-citamu! 🐦',type:'builtin'},
+ {id:'b4',q:'Berapakah hasil 5 + 3?',options:['6','7','8','9'],correct:2,comment:'Matematika jadi mudah kalau rajin latihan! 😎',type:'builtin'},
+ {id:'b5',q:'Planet tempat manusia tinggal adalah...',options:['Mars','Bumi','Venus','Jupiter'],correct:1,comment:'Bumi rumah kita, jaga selalu! 🌍',type:'builtin'},
+ {id:'b6',q:'Warna yang dihasilkan dari campuran merah dan kuning adalah...',options:['Hijau','Ungu','Oranye','Biru'],correct:2,comment:'Warna-warni pengetahuan! 🎨',type:'builtin'},
+ {id:'b7',q:'Alat untuk mengetik di komputer adalah...',options:['Mouse','Keyboard','Monitor','Speaker'],correct:1,comment:'Jari-jari siap mengetik! ⌨️',type:'builtin'},
+ {id:'b8',q:'Air membeku menjadi es pada suhu sekitar...',options:['0°C','20°C','50°C','100°C'],correct:0,comment:'Ilmu pengetahuan itu keren! 🧊',type:'builtin'}
+];
+let custom = loadCustom(), quizQuestions=[], index=0, score=0, answered=false, editId=null;
+function loadCustom(){try{let v=JSON.parse(localStorage.getItem('kuisCerdasCustom')||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+function saveCustom(){localStorage.setItem('kuisCerdasCustom',JSON.stringify(custom));updateCounts()}
+function updateCounts(){document.getElementById('customCount').textContent=custom.length+' soal';document.getElementById('sourceHint').textContent=`Soal bawaan: ${builtIn.length} • Soal buatanmu: ${custom.length}`;renderList('formList');renderList('questionList')}
+function show(id){['home','setup','formPage','listPage','quiz','result'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));window.scrollTo({top:0,behavior:'smooth'})}
+function goHome(){editId=null;show('home')}
+function showSetup(){updateCounts();document.getElementById('source').value='all';show('setup')}
+function openForm(){resetForm();renderList('formList');show('formPage')}
+function openList(){renderList('questionList');show('listPage')}
+let optionTotal=2;
+function drawOptionInputs(values=['','']){const holder=document.getElementById('optionInputs');holder.innerHTML='';values.forEach((v,i)=>{const wrap=document.createElement('div');wrap.style.marginBottom='8px';const inp=document.createElement('input');inp.className='field option-input';inp.required=true;inp.maxLength=180;inp.placeholder=`Pilihan ${i+1}`;inp.value=v;inp.setAttribute('aria-label',`Pilihan ${i+1}`);wrap.appendChild(inp);holder.appendChild(wrap)});optionTotal=values.length;document.getElementById('optionCount').textContent=optionTotal+' pilihan';updateCorrectOptions()}
+function updateCorrectOptions(){const sel=document.getElementById('correct'),old=sel.value;sel.innerHTML='';Array.from(document.querySelectorAll('.option-input')).forEach((inp,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`Pilihan ${i+1}`;sel.appendChild(o)});if(old!==''&&Number(old)<sel.options.length)sel.value=old}
+document.getElementById('addOption').onclick=()=>{if(optionTotal>=4)return alert('Maksimal 4 pilihan jawaban.');const vals=Array.from(document.querySelectorAll('.option-input')).map(x=>x.value);vals.push('');drawOptionInputs(vals)};
+document.getElementById('removeOption').onclick=()=>{if(optionTotal<=2)return alert('Minimal 2 pilihan jawaban.');const vals=Array.from(document.querySelectorAll('.option-input')).map(x=>x.value);vals.pop();drawOptionInputs(vals)};
+function resetForm(){editId=null;document.getElementById('questionForm').reset();drawOptionInputs(['','']);document.getElementById('saveBtn').textContent='💾 Simpan Pertanyaan'}
+document.getElementById('questionForm').addEventListener('submit',e=>{e.preventDefault();const q=document.getElementById('question').value.trim(),opts=Array.from(document.querySelectorAll('.option-input')).map(x=>x.value.trim()),correct=Number(document.getElementById('correct').value),comment=document.getElementById('comment').value.trim();if(!q||opts.some(x=>!x)){alert('Lengkapi pertanyaan dan semua pilihan jawaban.');return}const item={id:editId||('c'+Date.now()),q,options:opts,correct,comment,type:'custom'};if(editId){custom=custom.map(x=>x.id===editId?item:x)}else custom.push(item);saveCustom();resetForm();alert('Pertanyaan berhasil disimpan!');});
+function renderList(target){const box=document.getElementById(target);if(!box)return;box.innerHTML='';if(!custom.length){box.innerHTML='<div class="empty">Belum ada pertanyaan buatan sendiri. Yuk, buat sekarang! ✨</div>';return}custom.forEach((item,i)=>{const card=document.createElement('div');card.className='item';const main=document.createElement('main');const title=document.createElement('strong');title.textContent=`${i+1}. ${item.q}`;main.appendChild(title);const details=document.createElement('p');details.textContent=`Jawaban benar: ${item.options[item.correct]||''}${item.comment?' • Komentar: '+item.comment:''}`;main.appendChild(details);const actions=document.createElement('div');actions.className='item-actions';const edit=document.createElement('button');edit.className='primary';edit.textContent='✏️ Edit';edit.onclick=()=>editQuestion(item.id);const del=document.createElement('button');del.className='danger';del.textContent='🗑️';del.title='Hapus pertanyaan';del.onclick=()=>deleteQuestion(item.id);actions.append(edit,del);card.append(main,actions);box.appendChild(card)})}
+function editQuestion(id){const item=custom.find(x=>x.id===id);if(!item)return;editId=id;document.getElementById('question').value=item.q;drawOptionInputs([...item.options]);document.getElementById('correct').value=String(item.correct);document.getElementById('comment').value=item.comment||'';document.getElementById('saveBtn').textContent='💾 Simpan Perubahan';show('formPage')}
+function deleteQuestion(id){if(!confirm('Yakin ingin menghapus pertanyaan ini?'))return;custom=custom.filter(x=>x.id!==id);saveCustom()}
+function startQuiz(){const src=document.getElementById('source').value;quizQuestions=(src==='builtin'?[...builtIn]:src==='custom'?[...custom]:[...builtIn,...custom]).map(q=>({...q,options:[...q.options]}));if(!quizQuestions.length){alert('Belum ada soal untuk dimainkan. Buat pertanyaan sendiri terlebih dahulu.');return}index=0;score=0;shuffle(quizQuestions);renderQuestion();show('quiz')}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
+function renderQuestion(){answered=false;const q=quizQuestions[index];document.getElementById('quizProgressText').textContent=`Soal ${index+1} dari ${quizQuestions.length}`;document.getElementById('scoreText').textContent='⭐ Skor: '+score;document.getElementById('progressBar').style.width=((index)/quizQuestions.length*100)+'%';document.getElementById('quizQuestion').textContent=q.q;const holder=document.getElementById('quizChoices');holder.innerHTML='';let correctText=q.options[q.correct];let opts=q.options.map((text,i)=>({text,correct:i===q.correct}));shuffle(opts);opts.forEach((o,i)=>{const b=document.createElement('button');b.className='choice';b.textContent=String.fromCharCode(65+i)+'. '+o.text;b.onclick=()=>answer(b,o.correct,correctText,q.comment);holder.appendChild(b)});const fb=document.getElementById('feedback');fb.classList.add('hidden');fb.textContent='';const next=document.getElementById('nextBtn');next.disabled=true;next.textContent=index===quizQuestions.length-1?'Lihat Hasil 🏆':'Berikutnya →'}
+function answer(btn,isCorrect,correctText,comment){if(answered)return;answered=true;const buttons=Array.from(document.querySelectorAll('.choice'));buttons.forEach(b=>{b.disabled=true;if(b.textContent.endsWith(correctText))b.classList.add('correct')});if(isCorrect){score+=10;btn.classList.add('correct')}else btn.classList.add('wrong');const fb=document.getElementById('feedback');fb.classList.remove('hidden');fb.textContent=(isCorrect?'🎉 Benar! Hebat! ':'😅 Belum tepat. Jawaban benar: '+correctText+'. ')+(comment|| (isCorrect?'Otak makin encer! 🧠':'Jangan menyerah, coba lagi! 💪'));document.getElementById('scoreText').textContent='⭐ Skor: '+score;document.getElementById('nextBtn').disabled=false;document.getElementById('progressBar').style.width=((index+1)/quizQuestions.length*100)+'%'}
+function nextQuestion(){if(!answered)return;if(index<quizQuestions.length-1){index++;renderQuestion()}else finishQuiz()}
+function finishQuiz(){show('result');const max=quizQuestions.length*10;document.getElementById('finalScore').textContent=`${score} / ${max}`;const pct=Math.round(score/max*100);document.getElementById('resultTitle').textContent=pct>=80?'Luar Biasa! 🏆':'Kuis Selesai! 🎉';document.getElementById('resultMessage').textContent=pct>=80?'Kamu hebat! Terus semangat belajar! 💪':pct>=50?'Bagus! Terus berlatih agar makin jago! ✨':'Jangan menyerah, belajar sedikit demi sedikit ya! 🌱'}
+drawOptionInputs(['','']);updateCounts();
+</script>
+</body>
+</html>
